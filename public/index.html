@@ -30,8 +30,13 @@
     </div>
 
     <!-- Módulo de Rankings Globales -->
-    <div class="raider-card">
+    <div class="raider-card">/
       <h1 style="text-align: left; margin-bottom: 15px;">Tabla de Clasificación (Leaderboards)</h1>
+      <!-- Pestañas Principales -->
+      <div class="main-view-tabs">
+        <button class="view-tab-btn active" onclick="cambiarVista('jugadores')">🏆 Ranking Personajes</button>
+        <button class="view-tab-btn" onclick="cambiarVista('guilds')">🛡️ Ranking Hermandades</button>
+      </div>
       
       <div class="search-filter-section">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar personaje..." onkeyup="filtrarTabla()">
@@ -370,3 +375,58 @@
   </script>
 </body>
 </html>
+const guildsData = [
+      { rank: 1, nombre: "Liquid Colombia", avance: "8/8 HC", dpsTotal: "450,200", miembros: 25 },
+      { rank: 2, nombre: "Method Latam", avance: "8/8 HC", dpsTotal: "432,100", miembros: 25 },
+      { rank: 3, nombre: "Echo Rag", avance: "7/8 HC", dpsTotal: "398,000", miembros: 25 },
+      { rank: 4, nombre: "Ares Guild", avance: "6/8 HC", dpsTotal: "360,500", miembros: 10 }
+    ];
+
+    let vistaActual = 'jugadores';
+
+    function cambiarVista(tipo) {
+      vistaActual = tipo;
+      document.querySelectorAll('.view-tab-btn').forEach(b => b.classList.remove('active'));
+      if (event) event.target.classList.add('active');
+
+      const containerJugadores = document.getElementById('classBarContainer');
+      const filtersSection = document.querySelector('.search-filter-section');
+
+      if (tipo === 'guilds') {
+        if (containerJugadores) containerJugadores.style.display = 'none';
+        if (filtersSection) filtersSection.style.display = 'none';
+        renderGuilds();
+      } else {
+        if (containerJugadores) containerJugadores.style.display = 'flex';
+        if (filtersSection) filtersSection.style.display = 'flex';
+        renderRanking();
+      }
+    }
+
+    function renderGuilds() {
+      const tbody = document.getElementById('rankingBody');
+      const thead = document.querySelector('.ranking-table thead');
+      
+      thead.innerHTML = `
+        <tr>
+          <th>#</th>
+          <th>Hermandad (Guild)</th>
+          <th>Progreso Banda</th>
+          <th>DPS Conjunto</th>
+          <th>Roster</th>
+        </tr>
+      `;
+
+      tbody.innerHTML = '';
+      guildsData.forEach(g => {
+        tbody.innerHTML += `
+          <tr>
+            <td class="rank-top-1">#${g.rank}</td>
+            <td style="font-weight:bold; color:#fff;">🛡️ ${g.nombre}</td>
+            <td><span class="guild-progress">${g.avance}</span></td>
+            <td style="color:#f5ab00; font-weight:bold;">${g.dpsTotal}</td>
+            <td>${g.miembros} Jugadores</td>
+          </tr>
+        `;
+      });
+    }
