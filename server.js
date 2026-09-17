@@ -2,14 +2,18 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const readline = require('readline');
+const path = require('path');
+
 const app = express();
-
 const upload = multer({ dest: 'uploads/' });
-app.use(express.static('public'));
 
-// Mapeo completo de las 10 Clases y sus 3 Ramas para Cataclismo 4.3.4
+// Servir archivos estáticos de la carpeta public
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+
+// MAPEO DE HECHIZOS (Cataclismo 4.3.4)
 const SPELL_MAPPING = {
-   // ================= GUERRERO FURIA =================
+  // ================= GUERRERO FURIA =================
     "23881": { nombre: "Sed de sangre", clase: "Guerrero", rama: "Furia", rol: "DPS" },
     "85288": { nombre: "Golpe enfurecido", clase: "Guerrero", rama: "Furia", rol: "DPS" },
     "86346": { nombre: "Machaque colosal", clase: "Guerrero", rama: "Furia", rol: "DPS" },
@@ -1066,58 +1070,61 @@ const SPELL_MAPPING = {
     "Tranquilidad": { clase: "Druida", rama: "Restauración", rol: "Healer" },
 };
 
-app.post('/upload-log', upload.single('combatlog'), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'Sin archivo.' });
+// ENDPOINT DE SUBIDA Y PROCESAMIENTO DE LOGS
+app.post('/upload-log', upload.single('combatlog'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, error: 'No se subió ningún archivo' });
+  }
 
-    const filePath = req.file.path;
-    const rl = readline.createInterface({
-        input: fs.createReadStream(filePath),
-        crlfDelay: Infinity
-    });
+  const filePath = req.file.path;
+  const playersData = {};
 
-    let players = {};
+  try {
+    const fileStream = fs.createReadStream(filePath);
+    const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
 
-    rl.on('line', (line) => {
-        if (line.includes('SPELL_DAMAGE') || line.includes('SPELL_HEALING')) {
-            const parts = line.split(',');
-            if (parts.length > 10) {
-                const sourceName = parts[2]?.replace(/"/g, '');
-                const spellName = parts[10]?.replace(/"/g, '');
-                const amount = parseInt(parts[12]) || 0;
+    for await (const line of rl) {
+      if (line.includes('SPELL_DAMAGE') || line.includes('RANGE_DAMAGE') || line.includes('SWING_DAMAGE')) {
+        const parts = line.split(',');
 
-                if (sourceName && !sourceName.includes('Environment') && amount > 0) {
-                    if (!players[sourceName]) {
-                        players[sourceName] = {
-                            nombre: sourceName,
-                            clase: "Desconocido",
-                            rama: "General",
-                            rol: "DPS",
-                            totalDaño: 0,
-                            totalSana: 0
-                        };
-                    }
+        if (parts.length >= 10) {
+          const sourceName = parts[3] ? parts[3].replace(/"/g, '').trim() : null;
+          const spellId = parts[9] ? parts[9].trim() : null;
+          const amount = parseInt(parts[parts.length - 8] || parts[parts.length - 7] || 0, 10);
 
-                    if (SPELL_MAPPING[spellName]) {
-                        players[sourceName].clase = SPELL_MAPPING[spellName].clase;
-                        players[sourceName].rama = SPELL_MAPPING[spellName].rama;
-                        players[sourceName].rol = SPELL_MAPPING[spellName].rol;
-                    }
-
-                    if (line.includes('SPELL_DAMAGE')) players[sourceName].totalDaño += amount;
-                    if (line.includes('SPELL_HEALING')) players[sourceName].totalSana += amount;
-                }
+          if (sourceName && sourceName !== 'Environment' && !isNaN(amount) && amount > 0) {
+            if (!playersData[sourceName]) {
+              playersData[sourceName] = {
+                nombre: sourceName,
+                clase: 'Guerrero',
+                rama: 'Furia',
+                totalDaño: 0
+              };
             }
-        }
-    });
 
-    rl.on('close', () => {
-        fs.unlink(filePath, () => {});
-        const ranking = Object.values(players).sort((a, b) => 
-            (b.totalDaño + b.totalSana) - (a.totalDaño + a.totalSana)
-        );
-        res.json({ success: true, ranking: ranking });
-    });
+            playersData[sourceName].totalDaño += amount;
+
+            if (spellId && SPELL_MAPPING[spellId]) {
+              const spellInfo = SPELL_MAPPING[spellId];
+              playersData[sourceName].clase = spellInfo.clase;
+              playersData[sourceName].rama = spellInfo.rama;
+            }
+          }
+        }
+      }
+    }
+
+    const ranking = Object.values(playersData).sort((a, b) => b.totalDaño - a.totalDaño);
+
+    fs.unlinkSync(filePath);
+    res.json({ success: true, ranking: ranking });
+
+  } catch (err) {
+    console.error('Error leyendo el log:', err);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    res.status(500).json({ success: false, error: 'Error al procesar el archivo' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor activo en el puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor iniciado en puerto ${PORT}`));

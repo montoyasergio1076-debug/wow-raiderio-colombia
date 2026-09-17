@@ -34,10 +34,8 @@
       <h1 style="text-align: left; margin-bottom: 15px;">Tabla de Clasificación (Leaderboards)</h1>
       
       <div class="search-filter-section">
-        <!-- Buscador por nombre -->
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar personaje..." onkeyup="filtrarTabla()">
         
-        <!-- Selector de Clase -->
         <select id="classSelect" class="class-select" onchange="alCambiarClase()">
           <option value="Guerrero">Guerrero</option>
           <option value="Druida">Druida</option>
@@ -51,13 +49,11 @@
           <option value="Brujo">Brujo</option>
         </select>
 
-        <!-- Pestañas de Ramas -->
         <div class="spec-tabs" id="specTabsContainer">
           <button class="tab-btn active" onclick="cambiarRama('Todas')">Todas</button>
         </div>
       </div>
 
-      <!-- Tabla de Ranking -->
       <table class="ranking-table">
         <thead>
           <tr>
@@ -69,7 +65,6 @@
           </tr>
         </thead>
         <tbody id="rankingBody">
-          <!-- Datos renderizados dinámicamente -->
         </tbody>
       </table>
     </div>
@@ -237,7 +232,7 @@
     function cambiarRama(rama) {
       ramaSeleccionada = rama;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      if(event) event.target.classList.add('active');
       renderRanking();
     }
 
@@ -250,7 +245,6 @@
       const busqueda = document.getElementById('searchInput').value.toLowerCase();
       tbody.innerHTML = '';
 
-      // Filtrar por clase, rama y búsqueda
       const filtrados = rankingData.filter(j => {
         const coincideClase = (j.clase === claseSeleccionada);
         const coincideRama = (ramaSeleccionada === 'Todas' || j.rama === ramaSeleccionada);
@@ -263,7 +257,6 @@
         return;
       }
 
-      // Asignar posición numerada del 1 al 10 según el orden filtrado
       filtrados.forEach((j, index) => {
         const numeroRank = index + 1;
         let rankClass = 'rank-number';
@@ -291,23 +284,55 @@
       }
 
       const formData = new FormData();
-      formData.append('log', fileInput.files[0]);
+      formData.append('combatlog', fileInput.files[0]);
 
       try {
-        const respuesta = await fetch('/api/parse-log', {
+        const respuesta = await fetch('/upload-log', {
           method: 'POST',
           body: formData
         });
+        
         const datos = await respuesta.json();
-        localStorage.setItem('resultadoWoW', JSON.stringify(datos));
-        alert("¡Log analizado y guardado con éxito!");
+
+        if (datos && datos.success && datos.ranking && datos.ranking.length > 0) {
+          localStorage.setItem('resultadoWoW', JSON.stringify(datos.ranking));
+
+          datos.ranking.forEach(p => {
+            rankingData.unshift({
+              nombre: p.nombre,
+              clase: p.clase || 'Guerrero',
+              rama: p.rama || 'Furia',
+              dps: (p.totalDaño / 60).toLocaleString('en-US', { maximumFractionDigits: 0 })
+            });
+          });
+
+          renderRanking();
+          alert("¡Log analizado correctamente y registrado en el Ranking!");
+        } else {
+          alert("El log se procesó pero no se encontraron eventos de combate válidos.");
+        }
+
       } catch (error) {
         console.error("Error al analizar:", error);
-        alert("Ocurrió un error al procesar el archivo.");
+        alert("Ocurrió un error al procesar el archivo en el servidor.");
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      const datosPrevios = localStorage.getItem('resultadoWoW');
+      if (datosPrevios) {
+        const parsed = JSON.parse(datosPrevios);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(p => {
+            rankingData.unshift({
+              nombre: p.nombre,
+              clase: p.clase || 'Guerrero',
+              rama: p.rama || 'Furia',
+              dps: (p.totalDaño / 60).toLocaleString('en-US', { maximumFractionDigits: 0 })
+            });
+          });
+        }
+      }
       actualizarPestañasRamas();
       renderRanking();
     });
