@@ -251,3 +251,62 @@ body {
   border-radius: 6px;
   text-align: center;
 }
+/* DISEÑO ESTILO WARCRAFT LOGS */
+.wcl-header-banner {
+  background: linear-gradient(180deg, #121621 0%, #0a0c12 100%);
+  border-bottom: 1px solid #232838;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+}
+
+.wcl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  background: #0f1118;
+}
+
+.wcl-table th {
+  background: #161924;
+  color: #939bad;
+  padding: 8px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: 1px solid #232838;
+  text-align: left;
+}
+
+.wcl-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #1c202e;
+  color: #d1d5db;
+  white-space: nowrap;
+}
+
+.wcl-table tr:hover {
+  background: #181c28;
+}
+
+.item-level {
+  color: #e6cc80;
+  font-weight: 700;
+}
+
+.trinket-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  border: 1px solid #3c4257;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.buff-badge {
+  background: #1e293b;
+  border: 1px solid #3b82f6;
+  color: #60a5fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}

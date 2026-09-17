@@ -1318,14 +1318,17 @@ const BOSSES_MAPPING = {
       const bossFiltro = document.getElementById('bossSelect').value;
       const diffFiltro = document.getElementById('diffSelect').value;
 
+      // Encabezados extendidos estilo Warcraft Logs
       theadRow.innerHTML = `
-        <th>#</th>
-        <th>Personaje</th>
-        <th>Clase</th>
+        <th>Rank</th>
+        <th>Nombre</th>
+        <th>iLvl</th>
+        <th>DPS</th>
+        <th>Fecha</th>
+        <th>Duración</th>
         <th>Especialización</th>
-        <th>Jefe</th>
-        <th>Modalidad</th>
-        <th>DPS / HPS</th>
+        <th>Abalorios (Trinkets)</th>
+        <th>Buffs</th>
       `;
 
       tbody.innerHTML = '';
@@ -1336,36 +1339,39 @@ const BOSSES_MAPPING = {
         const coincideNombre = j.nombre.toLowerCase().includes(busqueda);
         const coincideBoss = (!j.boss || j.boss === bossFiltro);
         const coincideDiff = (!j.diff || j.diff === diffFiltro);
-
         return coincideClase && coincideRama && coincideNombre && coincideBoss && coincideDiff;
       });
 
       if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#8e94a8; padding: 25px;">No se encontraron registros para estos filtros</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#8e94a8; padding: 25px;">No hay registros de combate con este filtro</td></tr>';
         return;
       }
 
       filtrados.forEach((j, index) => {
-        const numeroRank = index + 1;
-        let rankClass = 'rank-number';
-        if (numeroRank === 1) rankClass = 'rank-top-1';
-        if (numeroRank === 2) rankClass = 'rank-top-2';
-        if (numeroRank === 3) rankClass = 'rank-top-3';
-
+        const rank = index + 1;
         const logoClase = LOGOS_CLASES[j.clase] || '';
+        
+        // Iconos por defecto de abalorios BiS de Alma de Dragón (p. ej., Insignia / Frasco)
+        const trinket1 = "https://render.worldofwarcraft.com/us/icons/56/inv_trinket_dragonsoul_01.jpg";
+        const trinket2 = "https://render.worldofwarcraft.com/us/icons/56/inv_trinket_dragonsoul_02.jpg";
 
         tbody.innerHTML += `
           <tr>
-            <td class="${rankClass}">#${numeroRank}</td>
-            <td style="font-weight:bold; color:#fff;">${j.nombre}</td>
-            <td style="color:#c79c6e;">
+            <td class="rank-top-1">#${rank}</td>
+            <td style="font-weight:bold; color:#fff;">
               <img src="${logoClase}" class="class-icon-table" alt="">
-              ${j.clase}
+              ${j.nombre}
             </td>
-            <td style="color: #d0d0d0;">${j.rama}</td>
-            <td style="color: #a3d01c;">${j.boss || bossFiltro}</td>
-            <td><span class="guild-progress">${j.diff || diffFiltro}</span></td>
-            <td style="color:#f5ab00; font-weight:bold;">${j.dps}</td>
+            <td class="item-level">${j.ilvl || '397'}</td>
+            <td style="color:#f5ab00; font-weight:800; font-size: 0.95rem;">${j.dps}</td>
+            <td style="color:#94a3b8;">${j.fecha || '17 Sep'}</td>
+            <td style="color:#94a3b8;">${j.duracion || '3:45'}</td>
+            <td style="color:#e2e8f0;">${j.rama}</td>
+            <td>
+              <img src="${trinket1}" class="trinket-icon" title="Abalorio 1">
+              <img src="${trinket2}" class="trinket-icon" title="Abalorio 2">
+            </td>
+            <td><span class="buff-badge">${j.buffs || '4'}</span></td>
           </tr>
         `;
       });
