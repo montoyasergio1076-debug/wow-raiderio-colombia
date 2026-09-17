@@ -72,6 +72,29 @@
   </div>
 
   <script>
+    // Diccionario de íconos oficiales para las especializaciones
+    const LOGOS_RAMAS = {
+      // Caballero de la Muerte
+      "Sangre": "https://render.worldofwarcraft.com/us/icons/56/spell_deathknight_bloodpresence.jpg",
+      "Escarcha": "https://render.worldofwarcraft.com/us/icons/56/spell_deathknight_frostpresence.jpg",
+      "Profano": "https://render.worldofwarcraft.com/us/icons/56/spell_deathknight_unholypresence.jpg",
+      
+      // Guerrero
+      "Furia": "https://render.worldofwarcraft.com/us/icons/56/ability_warrior_innerrage.jpg",
+      "Armas": "https://render.worldofwarcraft.com/us/icons/56/ability_rogue_eviscerate.jpg",
+      "Protección": "https://render.worldofwarcraft.com/us/icons/56/ability_warrior_defensivestance.jpg",
+
+      // Mago
+      "Arcano": "https://render.worldofwarcraft.com/us/icons/56/spell_holy_magicalsentry.jpg",
+      "Fuego": "https://render.worldofwarcraft.com/us/icons/56/spell_fire_firebolt02.jpg",
+
+      // Druida
+      "Feral": "https://render.worldofwarcraft.com/us/icons/56/ability_druid_cattouch.jpg",
+      "Equilibrio": "https://render.worldofwarcraft.com/us/icons/56/spell_nature_starfall.jpg",
+      "Guardián": "https://render.worldofwarcraft.com/us/icons/56/ability_racial_bearform.jpg",
+      "Restauración": "https://render.worldofwarcraft.com/us/icons/56/spell_nature_healingtouch.jpg"
+    };
+    
     const ESPECILIZACIONES = {
       "Guerrero": ["Furia", "Armas", "Protección"],
       "Druida": ["Feral", "Equilibrio", "Guardián", "Restauración"],
@@ -224,7 +247,15 @@
 
       if (ESPECILIZACIONES[claseSeleccionada]) {
         ESPECILIZACIONES[claseSeleccionada].forEach(rama => {
-          container.innerHTML += `<button class="tab-btn" onclick="cambiarRama('${rama}')">${rama}</button>`;
+          const imgUrl = LOGOS_RAMAS[rama] || '';
+          const imgTag = imgUrl ? `<img src="${imgUrl}" alt="${rama}">` : '';
+          
+          container.innerHTML += `
+            <button class="tab-btn" onclick="cambiarRama('${rama}')">
+              ${imgTag}
+              ${rama}
+            </button>
+          `;
         });
       }
     }
