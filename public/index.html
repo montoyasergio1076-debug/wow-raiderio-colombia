@@ -42,6 +42,24 @@
       <div class="class-bar" id="classBarContainer"></div>
 
       <div class="search-filter-section">
+        <select id="bossSelect" class="search-input" onchange="filtrarTabla()" style="cursor: pointer; font-weight: bold; color: var(--accent-gold); width: auto;">
+          <option value="Morchok">👹 Morchok</option>
+          <option value="Zon'ozz">👁️ Señor de la Guerra Zon'ozz</option>
+          <option value="Yorsahj">🧪 Yor'sahj el Velador</option>
+          <option value="Hagara">⚡ Hagara la Vinculadora</option>
+          <option value="Ultraxion">🐉 Ultraxion</option>
+          <option value="Cuerno Negra">🚢 Maestro de guerra Cuerno Negra</option>
+          <option value="Espinazo">🔥 Espinazo de Alamuerte</option>
+          <option value="Locura">🌋 Locura de Alamuerte</option>
+        </select>
+
+        <select id="diffSelect" class="search-input" onchange="filtrarTabla()" style="cursor: pointer; font-weight: bold; width: auto;">
+          <option value="10N">10 Normal (10N)</option>
+          <option value="25N">25 Normal (25N)</option>
+          <option value="10H">10 Heroico (10H)</option>
+          <option value="25H">25 Heroico (25H)</option>
+          <option value="LFR">Buscador de Bandas (LFR)</option>
+        </select>
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar personaje..." onkeyup="filtrarTabla()">
         
         <div class="spec-tabs" id="specTabsContainer">
@@ -67,6 +85,18 @@
   </div>
 
   <script>
+    // NOMBRES Y DIFICULTADES DE ALMA DE DRAGÓN
+const BOSSES_MAPPING = {
+  "Morchok": "Morchok",
+  "Zon'ozz": "Señor de la Guerra Zon'ozz",
+  "Yor'sahj": "Yor'sahj el Velador",
+  "Hagara": "Hagara la Vinculadora",
+  "Ultraxion": "Ultraxion",
+  "Warmaster Blackhorn": "Maestro de guerra Cuerno Negra",
+  "Cuerno Negra": "Maestro de guerra Cuerno Negra",
+  "Spine of Deathwing": "Espinazo de Alamuerte",
+  "Madness of Deathwing": "Locura de Alamuerte"
+};
     const SPELL_MAPPING = {
         // ================= GUERRERO FURIA =================
     "23881": { nombre: "Sed de sangre", clase: "Guerrero", rama: "Furia", rol: "DPS" },
@@ -1285,12 +1315,16 @@
       const tbody = document.getElementById('rankingBody');
       const theadRow = document.getElementById('tableHeaderRow');
       const busqueda = document.getElementById('searchInput').value.toLowerCase();
+      const bossFiltro = document.getElementById('bossSelect').value;
+      const diffFiltro = document.getElementById('diffSelect').value;
 
       theadRow.innerHTML = `
         <th>#</th>
         <th>Personaje</th>
         <th>Clase</th>
         <th>Especialización</th>
+        <th>Jefe</th>
+        <th>Modalidad</th>
         <th>DPS / HPS</th>
       `;
 
@@ -1300,11 +1334,14 @@
         const coincideClase = (j.clase === claseSeleccionada);
         const coincideRama = (ramaSeleccionada === 'Todas' || j.rama === ramaSeleccionada);
         const coincideNombre = j.nombre.toLowerCase().includes(busqueda);
-        return coincideClase && coincideRama && coincideNombre;
+        const coincideBoss = (!j.boss || j.boss === bossFiltro);
+        const coincideDiff = (!j.diff || j.diff === diffFiltro);
+
+        return coincideClase && coincideRama && coincideNombre && coincideBoss && coincideDiff;
       });
 
       if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8e94a8; padding: 25px;">No se encontraron personajes para este filtro</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#8e94a8; padding: 25px;">No se encontraron registros para estos filtros</td></tr>';
         return;
       }
 
@@ -1326,6 +1363,8 @@
               ${j.clase}
             </td>
             <td style="color: #d0d0d0;">${j.rama}</td>
+            <td style="color: #a3d01c;">${j.boss || bossFiltro}</td>
+            <td><span class="guild-progress">${j.diff || diffFiltro}</span></td>
             <td style="color:#f5ab00; font-weight:bold;">${j.dps}</td>
           </tr>
         `;
@@ -1379,12 +1418,17 @@
         if (datos && datos.success && datos.ranking && datos.ranking.length > 0) {
           localStorage.setItem('resultadoWoW', JSON.stringify(datos.ranking));
 
+          const bossSel = document.getElementById('bossSelect').value;
+          const diffSel = document.getElementById('diffSelect').value;
+
           datos.ranking.forEach(p => {
             rankingData.unshift({
               nombre: p.nombre,
               clase: p.clase || 'Guerrero',
               rama: p.rama || 'Furia',
-              dps: (p.totalDaño / 60).toLocaleString('en-US', { maximumFractionDigits: 0 })
+              boss: p.boss || bossSel,
+              diff: p.dificultad || diffSel,
+              dps: p.dps || (p.totalDaño / 60).toLocaleString('en-US', { maximumFractionDigits: 0 })
             });
           });
 
