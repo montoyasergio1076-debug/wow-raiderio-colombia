@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WoW Colombia RankingIO</title>
-  <!-- Aquí conectamos el archivo CSS -->
+  <title>WoW Colombia RaiderIO - Rankings Globales</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Encabezado de la página -->
+  <!-- Encabezado -->
   <nav class="navbar">
     <div class="brand">
       ⚔️ WOW <span>COLOMBIA</span> RAIDER.IO
     </div>
   </nav>
 
-  <!-- Caja principal de subida de archivo -->
   <div class="main-container">
-    <div class="raider-card">
+    
+    <!-- Subida de Logs -->
+    <div class="raider-card" style="margin-bottom: 30px;">
       <h1>Análisis de Combate</h1>
       <p>Subir WoWCombatLog.txt (Cataclismo 4.3.4)</p>
 
@@ -28,9 +28,261 @@
 
       <button class="btn-gold" onclick="analizarLog()">Analizar Log de Combate</button>
     </div>
+
+    <!-- Módulo de Rankings Globales -->
+    <div class="raider-card">
+      <h1 style="text-align: left; margin-bottom: 15px;">Tabla de Clasificación (Leaderboards)</h1>
+      
+      <div class="search-filter-section">
+        <!-- Buscador por nombre -->
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar personaje..." onkeyup="filtrarTabla()">
+        
+        <!-- Selector de Clase -->
+        <select id="classSelect" class="class-select" onchange="alCambiarClase()">
+          <option value="Guerrero">Guerrero</option>
+          <option value="Druida">Druida</option>
+          <option value="Mago">Mago</option>
+          <option value="Caballero de la Muerte">Caballero de la Muerte</option>
+          <option value="Cazador">Cazador</option>
+          <option value="Sacerdote">Sacerdote</option>
+          <option value="Pícaro">Pícaro</option>
+          <option value="Chamán">Chamán</option>
+          <option value="Paladín">Paladín</option>
+          <option value="Brujo">Brujo</option>
+        </select>
+
+        <!-- Pestañas de Ramas -->
+        <div class="spec-tabs" id="specTabsContainer">
+          <button class="tab-btn active" onclick="cambiarRama('Todas')">Todas</button>
+        </div>
+      </div>
+
+      <!-- Tabla de Ranking -->
+      <table class="ranking-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Personaje</th>
+            <th>Clase</th>
+            <th>Especialización</th>
+            <th>DPS / HPS</th>
+          </tr>
+        </thead>
+        <tbody id="rankingBody">
+          <!-- Datos renderizados dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+
   </div>
 
   <script>
+    const ESPECILIZACIONES = {
+      "Guerrero": ["Furia", "Armas", "Protección"],
+      "Druida": ["Feral", "Equilibrio", "Guardián", "Restauración"],
+      "Mago": ["Arcano", "Fuego", "Escarcha"],
+      "Caballero de la Muerte": ["Profano", "Escarcha", "Sangre"],
+      "Cazador": ["Dominio de Bestias", "Puntería", "Supervivencia"],
+      "Sacerdote": ["Disciplina", "Sagrado", "Sombra"],
+      "Pícaro": ["Combate", "Sutileza", "Asesinato"],
+      "Chamán": ["Elemental", "Mejora", "Restauración"],
+      "Paladín": ["Sagrado", "Represión", "Protección"],
+      "Brujo": ["Destrucción", "Demonología", "Aflicción"]
+    };
+
+    // 10 Personajes creados para el Top 10 de cada clase (100 en total)
+    const rankingData = [
+      // GUERREROS (10)
+      { nombre: "Garrosh", clase: "Guerrero", rama: "Furia", dps: "42,500" },
+      { nombre: "Varian", clase: "Guerrero", rama: "Armas", dps: "41,200" },
+      { nombre: "Saurfang", clase: "Guerrero", rama: "Protección", dps: "39,800" },
+      { nombre: "Muradin", clase: "Guerrero", rama: "Furia", dps: "38,400" },
+      { nombre: "Eitrigg", clase: "Guerrero", rama: "Armas", dps: "37,100" },
+      { nombre: "Cairne", clase: "Guerrero", rama: "Protección", dps: "35,800" },
+      { nombre: "Baine", clase: "Guerrero", rama: "Armas", dps: "34,300" },
+      { nombre: "Lorthemar", clase: "Guerrero", rama: "Furia", dps: "32,900" },
+      { nombre: "Genn", clase: "Guerrero", rama: "Furia", dps: "31,500" },
+      { nombre: "Jarod", clase: "Guerrero", rama: "Protección", dps: "30,100" },
+
+      // DRUIDAS (10)
+      { nombre: "Malfurion", clase: "Druida", rama: "Feral", dps: "43,100" },
+      { nombre: "Hamuul", clase: "Druida", rama: "Equilibrio", dps: "41,800" },
+      { nombre: "Broll", clase: "Druida", rama: "Guardián", dps: "39,500" },
+      { nombre: "ZenTabra", clase: "Druida", rama: "Restauración", dps: "38,200" },
+      { nombre: "Lunara", clase: "Druida", rama: "Equilibrio", dps: "36,900" },
+      { nombre: "Grom", clase: "Druida", rama: "Feral", dps: "35,100" },
+      { nombre: "Celestine", clase: "Druida", rama: "Restauración", dps: "33,700" },
+      { nombre: "Aluane", clase: "Druida", rama: "Equilibrio", dps: "32,400" },
+      { nombre: "Ursoc", clase: "Druida", rama: "Guardián", dps: "31,000" },
+      { nombre: "Kroll", clase: "Druida", rama: "Feral", dps: "29,800" },
+
+      // MAGOS (10)
+      { nombre: "Khadgar", clase: "Mago", rama: "Arcano", dps: "45,200" },
+      { nombre: "Jaina", clase: "Mago", rama: "Escarcha", dps: "43,900" },
+      { nombre: "Kaelthas", clase: "Mago", rama: "Fuego", dps: "42,100" },
+      { nombre: "Rhonin", clase: "Mago", rama: "Arcano", dps: "40,300" },
+      { nombre: "Aegwynn", clase: "Mago", rama: "Fuego", dps: "38,900" },
+      { nombre: "Medivh", clase: "Mago", rama: "Arcano", dps: "37,400" },
+      { nombre: "Antonidas", clase: "Mago", rama: "Escarcha", dps: "35,800" },
+      { nombre: "Modera", clase: "Mago", rama: "Escarcha", dps: "34,200" },
+      { nombre: "Aethas", clase: "Mago", rama: "Fuego", dps: "32,600" },
+      { nombre: "Nielas", clase: "Mago", rama: "Arcano", dps: "31,100" },
+
+      // CABALLEROS DE LA MUERTE (10)
+      { nombre: "Arthas", clase: "Caballero de la Muerte", rama: "Profano", dps: "44,800" },
+      { nombre: "Mograine", clase: "Caballero de la Muerte", rama: "Escarcha", dps: "42,600" },
+      { nombre: "Thassarian", clase: "Caballero de la Muerte", rama: "Sangre", dps: "40,100" },
+      { nombre: "Koltira", clase: "Caballero de la Muerte", rama: "Escarcha", dps: "38,700" },
+      { nombre: "Darnavan", clase: "Caballero de la Muerte", rama: "Profano", dps: "37,000" },
+      { nombre: "Nazgrim", clase: "Caballero de la Muerte", rama: "Sangre", dps: "35,400" },
+      { nombre: "Thoras", clase: "Caballero de la Muerte", rama: "Profano", dps: "33,900" },
+      { nombre: "Whitemane", clase: "Caballero de la Muerte", rama: "Escarcha", dps: "32,100" },
+      { nombre: "Amalthazad", clase: "Caballero de la Muerte", rama: "Profano", dps: "30,800" },
+      { nombre: "Crok", clase: "Caballero de la Muerte", rama: "Sangre", dps: "29,500" },
+
+      // CAZADORES (10)
+      { nombre: "Rexxar", clase: "Cazador", rama: "Dominio de Bestias", dps: "43,000" },
+      { nombre: "Sylvanas", clase: "Cazador", rama: "Puntería", dps: "41,700" },
+      { nombre: "Alleria", clase: "Cazador", rama: "Puntería", dps: "39,900" },
+      { nombre: "Hemet", clase: "Cazador", rama: "Supervivencia", dps: "38,200" },
+      { nombre: "Vereesa", clase: "Cazador", rama: "Puntería", dps: "36,500" },
+      { nombre: "Shandris", clase: "Cazador", rama: "Dominio de Bestias", dps: "35,100" },
+      { nombre: "Voljin", clase: "Cazador", rama: "Supervivencia", dps: "33,400" },
+      { nombre: "Nathanos", clase: "Cazador", rama: "Puntería", dps: "31,900" },
+      { nombre: "Halduron", clase: "Cazador", rama: "Dominio de Bestias", dps: "30,200" },
+      { nombre: "Kurdran", clase: "Cazador", rama: "Supervivencia", dps: "28,900" },
+
+      // SACERDOTES (10)
+      { nombre: "Anduin", clase: "Sacerdote", rama: "Disciplina", dps: "40,500" },
+      { nombre: "Velen", clase: "Sacerdote", rama: "Sagrado", dps: "39,100" },
+      { nombre: "Xalatah", clase: "Sacerdote", rama: "Sombra", dps: "37,800" },
+      { nombre: "Tyrande", clase: "Sacerdote", rama: "Sagrado", dps: "36,200" },
+      { nombre: "Moira", clase: "Sacerdote", rama: "Sombra", dps: "34,900" },
+      { nombre: "Faol", clase: "Sacerdote", rama: "Disciplina", dps: "33,100" },
+      { nombre: "Benedictus", clase: "Sacerdote", rama: "Sombra", dps: "31,700" },
+      { nombre: "Talia", clase: "Sacerdote", rama: "Sagrado", dps: "30,400" },
+      { nombre: "Zabra", clase: "Sacerdote", rama: "Sombra", dps: "29,000" },
+      { nombre: "Rohan", clase: "Sacerdote", rama: "Disciplina", dps: "27,800" },
+
+      // PÍCAROS (10)
+      { nombre: "Valeera", clase: "Pícaro", rama: "Asesinato", dps: "44,100" },
+      { nombre: "Illidan", clase: "Pícaro", rama: "Combate", dps: "42,800" },
+      { nombre: "Garona", clase: "Pícaro", rama: "Asesinato", dps: "41,000" },
+      { nombre: "Shaw", clase: "Pícaro", rama: "Sutileza", dps: "39,300" },
+      { nombre: "Vanessa", clase: "Pícaro", rama: "Combate", dps: "37,600" },
+      { nombre: "Tess", clase: "Pícaro", rama: "Sutileza", dps: "36,000" },
+      { nombre: "Lilian", clase: "Pícaro", rama: "Asesinato", dps: "34,400" },
+      { nombre: "Marin", clase: "Pícaro", rama: "Combate", dps: "32,900" },
+      { nombre: "Jorach", clase: "Pícaro", rama: "Sutileza", dps: "31,200" },
+      { nombre: "Taoshi", clase: "Pícaro", rama: "Asesinato", dps: "29,700" },
+
+      // CHAMANES (10)
+      { nombre: "Sergio", clase: "Chamán", rama: "Elemental", dps: "43,800" },
+      { nombre: "Nobundo", clase: "Chamán", rama: "Restauración", dps: "41,500" },
+      { nombre: "Rehgar", clase: "Chamán", rama: "Mejora", dps: "39,800" },
+      { nombre: "Aggra", clase: "Chamán", rama: "Elemental", dps: "38,100" },
+      { nombre: "Muln", clase: "Chamán", rama: "Restauración", dps: "36,400" },
+      { nombre: "Drekthar", clase: "Chamán", rama: "Elemental", dps: "34,900" },
+      { nombre: "Farseer", clase: "Chamán", rama: "Mejora", dps: "33,200" },
+      { nombre: "Stormsong", clase: "Chamán", rama: "Restauración", dps: "31,800" },
+      { nombre: "Gorfang", clase: "Chamán", rama: "Mejora", dps: "30,100" },
+      { nombre: "Brak", clase: "Chamán", rama: "Elemental", dps: "28,600" },
+
+      // PALADINES (10)
+      { nombre: "Tirion", clase: "Paladín", rama: "Represión", dps: "43,500" },
+      { nombre: "Uther", clase: "Paladín", rama: "Sagrado", dps: "41,900" },
+      { nombre: "Turalyon", clase: "Paladín", rama: "Protección", dps: "40,200" },
+      { nombre: "Liadrin", clase: "Paladín", rama: "Represión", dps: "38,600" },
+      { nombre: "Sunwalker", clase: "Paladín", rama: "Protección", dps: "37,000" },
+      { nombre: "Yrel", clase: "Paladín", rama: "Represión", dps: "35,300" },
+      { nombre: "Maraad", clase: "Paladín", rama: "Represión", dps: "33,800" },
+      { nombre: "Grayson", clase: "Paladín", rama: "Sagrado", dps: "32,100" },
+      { nombre: "Boros", clase: "Paladín", rama: "Protección", dps: "30,700" },
+      { nombre: "Arik", clase: "Paladín", rama: "Sagrado", dps: "29,200" },
+
+      // BRUJOS (10)
+      { nombre: "Guldan", clase: "Brujo", rama: "Destrucción", dps: "45,000" },
+      { nombre: "Ritssyn", clase: "Brujo", rama: "Demonología", dps: "43,200" },
+      { nombre: "Kanrethad", clase: "Brujo", rama: "Aflicción", dps: "41,600" },
+      { nombre: "Shinfel", clase: "Brujo", rama: "Destrucción", dps: "39,800" },
+      { nombre: "Jubeka", clase: "Brujo", rama: "Aflicción", dps: "38,100" },
+      { nombre: "Zinnin", clase: "Brujo", rama: "Demonología", dps: "36,500" },
+      { nombre: "Wilfred", clase: "Brujo", rama: "Demonología", dps: "34,900" },
+      { nombre: "Niby", clase: "Brujo", rama: "Destrucción", dps: "33,200" },
+      { nombre: "Tevin", clase: "Brujo", rama: "Aflicción", dps: "31,600" },
+      { nombre: "Gargok", clase: "Brujo", rama: "Destrucción", dps: "30,000" }
+    ];
+
+    let claseSeleccionada = 'Guerrero';
+    let ramaSeleccionada = 'Todas';
+
+    function alCambiarClase() {
+      claseSeleccionada = document.getElementById('classSelect').value;
+      ramaSeleccionada = 'Todas';
+      actualizarPestañasRamas();
+      renderRanking();
+    }
+
+    function actualizarPestañasRamas() {
+      const container = document.getElementById('specTabsContainer');
+      container.innerHTML = '<button class="tab-btn active" onclick="cambiarRama(\'Todas\')">Todas</button>';
+
+      if (ESPECILIZACIONES[claseSeleccionada]) {
+        ESPECILIZACIONES[claseSeleccionada].forEach(rama => {
+          container.innerHTML += `<button class="tab-btn" onclick="cambiarRama('${rama}')">${rama}</button>`;
+        });
+      }
+    }
+
+    function cambiarRama(rama) {
+      ramaSeleccionada = rama;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderRanking();
+    }
+
+    function filtrarTabla() {
+      renderRanking();
+    }
+
+    function renderRanking() {
+      const tbody = document.getElementById('rankingBody');
+      const busqueda = document.getElementById('searchInput').value.toLowerCase();
+      tbody.innerHTML = '';
+
+      // Filtrar por clase, rama y búsqueda
+      const filtrados = rankingData.filter(j => {
+        const coincideClase = (j.clase === claseSeleccionada);
+        const coincideRama = (ramaSeleccionada === 'Todas' || j.rama === ramaSeleccionada);
+        const coincideNombre = j.nombre.toLowerCase().includes(busqueda);
+        return coincideClase && coincideRama && coincideNombre;
+      });
+
+      if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#9d9d9d;">No se encontraron personajes para este filtro</td></tr>';
+        return;
+      }
+
+      // Asignar posición numerada del 1 al 10 según el orden filtrado
+      filtrados.forEach((j, index) => {
+        const numeroRank = index + 1;
+        let rankClass = 'rank-number';
+        if (numeroRank === 1) rankClass = 'rank-top-1';
+        if (numeroRank === 2) rankClass = 'rank-top-2';
+        if (numeroRank === 3) rankClass = 'rank-top-3';
+
+        tbody.innerHTML += `
+          <tr>
+            <td class="${rankClass}">#${numeroRank}</td>
+            <td style="font-weight:bold; color:#fff;">${j.nombre}</td>
+            <td style="color:#c79c6e;">${j.clase}</td>
+            <td>${j.rama}</td>
+            <td style="color:#f5ab00; font-weight:bold;">${j.dps}</td>
+          </tr>
+        `;
+      });
+    }
+
     async function analizarLog() {
       const fileInput = document.getElementById('logInput');
       if (!fileInput.files[0]) {
@@ -47,8 +299,6 @@
           body: formData
         });
         const datos = await respuesta.json();
-        
-        // Guardar en la memoria del navegador
         localStorage.setItem('resultadoWoW', JSON.stringify(datos));
         alert("¡Log analizado y guardado con éxito!");
       } catch (error) {
@@ -56,6 +306,11 @@
         alert("Ocurrió un error al procesar el archivo.");
       }
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      actualizarPestañasRamas();
+      renderRanking();
+    });
   </script>
 </body>
 </html>

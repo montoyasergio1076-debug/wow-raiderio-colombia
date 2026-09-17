@@ -87,4 +87,106 @@ body {
   border-radius: 6px;
   padding: 20px;
   margin-bottom: 20px;
+}/* BARRA DE BÚSQUEDA Y FILTROS */
+.search-filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  background: #12141d;
+  border: 1px solid var(--border-color);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 4px;
+  width: 250px;
+  font-size: 0.9rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+}
+
+.spec-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  background: #12141d;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.tab-btn.active, .tab-btn:hover {
+  background: var(--accent-gold);
+  color: #111;
+  border-color: var(--accent-gold);
+}
+
+/* TABLA DE RANKING */
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.ranking-table th {
+  background: #0f1118;
+  color: var(--accent-gold);
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.ranking-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.ranking-table tbody tr:hover {
+  background: rgba(245, 171, 0, 0.05);
+}
+
+.rank-number {
+  font-weight: bold;
+  color: #fff;
+}
+
+.rank-top-1 { color: #ff7d0a; font-weight: 800; }
+.rank-top-2 { color: #e6cc80; font-weight: 800; }
+.rank-top-3 { color: #0070dd; font-weight: 800; }
+/* SELECTORES DE CLASE Y ESPECIALIZACIÓN */
+.class-select {
+  background: #12141d;
+  border: 1px solid var(--border-color);
+  color: var(--accent-gold);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.class-select:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+}
+
+.class-select option {
+  background: #1a1d29;
+  color: #fff;
 }
