@@ -85,6 +85,100 @@
   </div>
 
   <script>
+    // MAPEO DE ABALORIOS DE AGILIDAD POR SPELL ID Y PROC (Cataclismo 4.3.4)
+const TRINKET_SPELL_MAPPING = {
+  // CÓLERA DE DESENCADENAMIENTO (Trance de combate - BUFF)
+  109717: { abalorio: "Cólera de desencadenamiento", itemID: 77974, modalidad: "LFR", tipo: "BUFF", stat: "Agilidad" },
+  107960: { abalorio: "Cólera de desencadenamiento", itemID: 77197, modalidad: "10N/25N", tipo: "BUFF", stat: "Agilidad" },
+  109719: { abalorio: "Cólera de desencadenamiento", itemID: 77994, modalidad: "10H/25H", tipo: "BUFF", stat: "Agilidad" },
+
+  // VIAL DE SOMBRAS (Golpe de relámpagos - DAMAGE)
+  // LFR ID item: 77979
+  107995: { abalorio: "Vial de sombras", itemID: 77207, modalidad: "10N/25N", tipo: "DAMAGE", stat: "Daño físico" },
+  109725: { abalorio: "Vial de sombras", itemID: 77999, modalidad: "10H/25H", tipo: "DAMAGE", stat: "Daño físico" },
+
+  // BRÚJULA CAZAESTRELLAS (Velocidad - BUFF)
+  109709: { abalorio: "Brújula cazaestrellas", itemID: 77973, modalidad: "LFR", tipo: "BUFF", stat: "Celeridad" },
+  107982: { abalorio: "Brújula cazaestrellas", itemID: 77202, modalidad: "10N/25N", tipo: "BUFF", stat: "Celeridad" },
+  109711: { abalorio: "Brújula cazaestrellas", itemID: 77993, modalidad: "10H/25H", tipo: "BUFF", stat: "Celeridad" },
+
+  // ESTABILIZADOR DE MATRIZ (Tierras del Fuego)
+  96977: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal", tipo: "BUFF", stat: "Secundario" },
+  96978: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal", tipo: "BUFF", stat: "Secundario" },
+  96979: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal", tipo: "BUFF", stat: "Secundario" },
+  97139: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico", tipo: "BUFF", stat: "Secundario" },
+  97140: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico", tipo: "BUFF", stat: "Secundario" },
+  97141: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico", tipo: "BUFF", stat: "Secundario" }
+};
+// MAPEO DE ABALORIOS POR SPELL ID
+    const TRINKET_SPELL_MAPPINGFUERZA = {
+      // Estabilizador de matriz (Tierras del Fuego)
+      96977: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal", tipo: "BUFF", stat: "Secundario" },
+      96978: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal", tipo: "BUFF", stat: "Secundario" },
+      96979: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal", tipo: "BUFF", stat: "Secundario" },
+      97139: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico", tipo: "BUFF", stat: "Secundario" },
+      97140: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico", tipo: "BUFF", stat: "Secundario" },
+      97141: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico", tipo: "BUFF", stat: "Secundario" },
+
+      // Nido del último dragón (Encontrar debilidad - BUFF Crítico)
+      109742: { abalorio: "Nido del último dragón", itemID: 77972, modalidad: "LFR", tipo: "BUFF", stat: "Crítico" },
+      107988: { abalorio: "Nido del último dragón", itemID: 77205, modalidad: "10N/25N", tipo: "BUFF", stat: "Crítico" },
+      109744: { abalorio: "Nido del último dragón", itemID: 77992, modalidad: "10H/25H", tipo: "BUFF", stat: "Crítico" },
+
+      // Ojo de destrucción (Fuerza titánica - BUFF Fuerza)
+      109748: { abalorio: "Ojo de destrucción", itemID: 77977, modalidad: "LFR", tipo: "BUFF", stat: "Fuerza" },
+      107966: { abalorio: "Ojo de destrucción", itemID: 77200, modalidad: "10N/25N", tipo: "BUFF", stat: "Fuerza" },
+      109750: { abalorio: "Ojo de destrucción", itemID: 77997, modalidad: "10H/25H", tipo: "BUFF", stat: "Fuerza" },
+
+      // Fetiche de vínculo de huesos (Remolino de huesos - DAMAGE Física AoE)
+      109754: { abalorio: "Fetiche de vínculo de huesos", itemID: 77982, modalidad: "LFR", tipo: "DAMAGE", stat: "Daño físico AoE" },
+      107998: { abalorio: "Fetiche de vínculo de huesos", itemID: 77210, modalidad: "10N/25N", tipo: "DAMAGE", stat: "Daño físico AoE" },
+      109756: { abalorio: "Fetiche de vínculo de huesos", itemID: 78002, modalidad: "10H/25H", tipo: "DAMAGE", stat: "Daño físico AoE" }
+      
+    };
+    const TRINKET_SPELL_MAPPINGhEAL = {
+        // CORAZÓN DEL SIN VIDA (Mente expansiva - BUFF Espíritu)
+      109811: { abalorio: "Corazón del sin vida", itemID: 77976, modalidad: "LFR", tipo: "BUFF", stat: "Espíritu" },
+      107962: { abalorio: "Corazón del sin vida", itemID: 77199, modalidad: "10N/25N", tipo: "BUFF", stat: "Espíritu" },
+      109813: { abalorio: "Corazón del sin vida", itemID: 77996, modalidad: "10H/25H", tipo: "BUFF", stat: "Espíritu" },
+
+      // CORAZÓN GUARDAVIENTOS (Curación del corazón guardavientos - HEAL)
+      109825: { abalorio: "Corazón guardavientos", itemID: 77981, modalidad: "LFR", tipo: "HEAL", stat: "Curación directa" },
+      108002: { abalorio: "Corazón guardavientos", itemID: 77209, modalidad: "10N/25N", tipo: "HEAL", stat: "Curación directa" },
+      109827: { abalorio: "Corazón guardavientos", itemID: 78001, modalidad: "10H/25H", tipo: "HEAL", stat: "Curación directa" },
+
+      // SELLO DE LOS SIETE SÍMBOLOS (Velocidad - BUFF Celeridad)
+      109802: { abalorio: "Sello de los siete símbolos", itemID: 77969, modalidad: "LFR", tipo: "BUFF", stat: "Celeridad" },
+      107982: { abalorio: "Sello de los siete símbolos", itemID: 77204, modalidad: "10N/25N", tipo: "BUFF", stat: "Celeridad" },
+      109804: { abalorio: "Sello de los siete símbolos", itemID: 77989, modalidad: "10H/25H", tipo: "BUFF", stat: "Celeridad" },
+        };
+    const TRINKET_SPELL_MAPPINGTANK = {
+        // RESOLUCIÓN DE ETERNIDAD (Evasión preternatural - BUFF Esquiva)
+      109780: { abalorio: "Resolución de eternidad", itemID: 77978, modalidad: "LFR", tipo: "BUFF", stat: "Esquiva" },
+      107968: { abalorio: "Resolución de eternidad", itemID: 77201, modalidad: "10N/25N", tipo: "BUFF", stat: "Esquiva" },
+      109782: { abalorio: "Resolución de eternidad", itemID: 77998, modalidad: "10H/25H", tipo: "BUFF", stat: "Esquiva" },
+
+      // ORGULLO INDÓMITO (Indomable - ABSORCIÓN Escudo)
+      108007: { abalorio: "Orgullo indómito", itemID: 77983, modalidad: "LFR / Normal", tipo: "ABSORB", stat: "Absorción" },
+      109786: { abalorio: "Orgullo indómito", itemID: 78003, modalidad: "10H/25H", tipo: "ABSORB", stat: "Absorción" },
+
+      // VÓRTICE TRANSFIGURADOR DE ALMAS (Maestro táctico - BUFF Maestría)
+      109774: { abalorio: "Vórtice transfigurador de almas", itemID: 77970, modalidad: "LFR", tipo: "BUFF", stat: "Maestría" },
+      107986: { abalorio: "Vórtice transfigurador de almas", itemID: 77206, modalidad: "10N/25N", tipo: "BUFF", stat: "Maestría" },
+      109776: { abalorio: "Vórtice transfigurador de almas", itemID: 77990, modalidad: "10H/25H", tipo: "BUFF", stat: "Maestría" }
+        };
+        // Generamos los íconos de los abalorios detectados
+        let trinketsHtml = '';
+        if (j.trinketIDs && j.trinketIDs.length > 0) {
+          j.trinketIDs.forEach(id => {
+            const iconFile = TRINKET_ICONS[id] || "inv_trinket_dragonsoul_01.jpg";
+            const iconUrl = `https://render.worldofwarcraft.com/us/icons/56/${iconFile}`;
+            trinketsHtml += `<img src="${iconUrl}" class="trinket-icon" title="Item ID: ${id}" alt="Trinket">`;
+          });
+        } else {
+          trinketsHtml = '<span style="color:#666; font-size:0.75rem;">-</span>';
+        }
+            
     // NOMBRES Y DIFICULTADES DE ALMA DE DRAGÓN
 const BOSSES_MAPPING = {
   "Morchok": "Morchok",

@@ -11,6 +11,90 @@ const upload = multer({ dest: 'uploads/' });
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+const TRINKET_ICONS = {
+  77211: "inv_trinket_dragonsoul_04.jpg", // Orgullo indómito
+  77201: "inv_trinket_dragonsoul_05.jpg", // Resolución de eternidad
+  77206: "inv_trinket_dragonsoul_06.jpg", // Vórtice transfigurador de almas
+  77209: "inv_trinket_dragonsoul_07.jpg", // Corazón guardavientos
+  77204: "inv_trinket_dragonsoul_08.jpg", // Sello de los siete símbolos
+  77199: "inv_trinket_dragonsoul_09.jpg", // Corazón del sin vida
+  77210: "inv_trinket_dragonsoul_10.jpg", // Fetiche de vínculo de huesos
+  77200: "inv_trinket_dragonsoul_11.jpg", // Ojo de destrucción
+  77205: "inv_trinket_dragonsoul_12.jpg", // Nido del último dragón
+  77116: "inv_misc_gem_matrix_01.jpg",    // Estabilizador de matriz
+  77202: "inv_trinket_dragonsoul_01.jpg", // Brújula Cazaestrellas
+  77207: "inv_trinket_dragonsoul_02.jpg", // Vial de sombras
+  77197: "inv_trinket_dragonsoul_03.jpg"  // Cólera de desencadenamiento
+};
+
+// 1. DICCIONARIO COMPLETO DE ABALORIOS POR SPELL ID (Alma de Dragón 4.3.4)
+const TRINKET_SPELL_MAPPING = {
+  // Estabilizador de matriz (Tierras del Fuego)
+  96977: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal" },
+  96978: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal" },
+  96979: { abalorio: "Estabilizador de matriz", itemID: 68994, modalidad: "Normal" },
+  97139: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico" },
+  97140: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico" },
+  97141: { abalorio: "Estabilizador de matriz", itemID: 69150, modalidad: "Heroico" },
+
+  // Cólera de desencadenamiento (Agilidad)
+  109717: { abalorio: "Cólera de desencadenamiento", itemID: 77974, modalidad: "LFR" },
+  107960: { abalorio: "Cólera de desencadenamiento", itemID: 77197, modalidad: "10N/25N" },
+  109719: { abalorio: "Cólera de desencadenamiento", itemID: 77994, modalidad: "10H/25H" },
+
+  // Vial de sombras (Agilidad)
+  107995: { abalorio: "Vial de sombras", itemID: 77207, modalidad: "10N/25N" },
+  109725: { abalorio: "Vial de sombras", itemID: 77999, modalidad: "10H/25H" },
+
+  // Brújula cazaestrellas (Agilidad)
+  109709: { abalorio: "Brújula cazaestrellas", itemID: 77973, modalidad: "LFR" },
+  107982: { abalorio: "Brújula cazaestrellas", itemID: 77202, modalidad: "10N/25N" },
+  109711: { abalorio: "Brújula cazaestrellas", itemID: 77993, modalidad: "10H/25H" },
+
+  // Nido del último dragón (Fuerza)
+  109742: { abalorio: "Nido del último dragón", itemID: 77972, modalidad: "LFR" },
+  107988: { abalorio: "Nido del último dragón", itemID: 77205, modalidad: "10N/25N" },
+  109744: { abalorio: "Nido del último dragón", itemID: 77992, modalidad: "10H/25H" },
+
+  // Ojo de destrucción (Fuerza)
+  109748: { abalorio: "Ojo de destrucción", itemID: 77977, modalidad: "LFR" },
+  107966: { abalorio: "Ojo de destrucción", itemID: 77200, modalidad: "10N/25N" },
+  109750: { abalorio: "Ojo de destrucción", itemID: 77997, modalidad: "10H/25H" },
+
+  // Fetiche de vínculo de huesos (Fuerza)
+  109754: { abalorio: "Fetiche de vínculo de huesos", itemID: 77982, modalidad: "LFR" },
+  107998: { abalorio: "Fetiche de vínculo de huesos", itemID: 77210, modalidad: "10N/25N" },
+  109756: { abalorio: "Fetiche de vínculo de huesos", itemID: 78002, modalidad: "10H/25H" },
+
+  // Corazón del sin vida (Heal - Espíritu)
+  109811: { abalorio: "Corazón del sin vida", itemID: 77976, modalidad: "LFR" },
+  107962: { abalorio: "Corazón del sin vida", itemID: 77199, modalidad: "10N/25N" },
+  109813: { abalorio: "Corazón del sin vida", itemID: 77996, modalidad: "10H/25H" },
+
+  // Corazón guardavientos (Heal)
+  109825: { abalorio: "Corazón guardavientos", itemID: 77981, modalidad: "LFR" },
+  108002: { abalorio: "Corazón guardavientos", itemID: 77209, modalidad: "10N/25N" },
+  109827: { abalorio: "Corazón guardavientos", itemID: 78001, modalidad: "10H/25H" },
+
+  // Sello de los siete símbolos (Heal)
+  109802: { abalorio: "Sello de los siete símbolos", itemID: 77969, modalidad: "LFR" },
+  107982: { abalorio: "Sello de los siete símbolos", itemID: 77204, modalidad: "10N/25N" },
+  109804: { abalorio: "Sello de los siete símbolos", itemID: 77989, modalidad: "10H/25H" },
+
+  // Resolución de eternidad (Tanque - Esquiva)
+  109780: { abalorio: "Resolución de eternidad", itemID: 77978, modalidad: "LFR" },
+  107968: { abalorio: "Resolución de eternidad", itemID: 77201, modalidad: "10N/25N" },
+  109782: { abalorio: "Resolución de eternidad", itemID: 77998, modalidad: "10H/25H" },
+
+  // Orgullo indómito (Tanque - Absorción)
+  108007: { abalorio: "Orgullo indómito", itemID: 77983, modalidad: "LFR / Normal" },
+  109786: { abalorio: "Orgullo indómito", itemID: 78003, modalidad: "10H/25H" },
+
+  // Vórtice transfigurador de almas (Tanque - Maestría)
+  109774: { abalorio: "Vórtice transfigurador de almas", itemID: 77970, modalidad: "LFR" },
+  107986: { abalorio: "Vórtice transfigurador de almas", itemID: 77206, modalidad: "10N/25N" },
+  109776: { abalorio: "Vórtice transfigurador de almas", itemID: 77990, modalidad: "10H/25H" }
+};
 // MAPEO DE HECHIZOS (Cataclismo 4.3.4)
 const SPELL_MAPPING = {
   // ================= GUERRERO FURIA =================
@@ -1069,6 +1153,28 @@ const SPELL_MAPPING = {
     "Nutrir": { clase: "Druida", rama: "Restauración", rol: "Healer" },
     "Tranquilidad": { clase: "Druida", rama: "Restauración", rol: "Healer" },
 };
+// 2. LÓGICA DENTRO DEL LECTOR DE LÍNEAS DEL LOG
+// (Dentro del bucle que procesa cada línea del archivo WoWCombatLog.txt)
+const parts = line.split(',');
+if (parts.length > 9) {
+  const eventType = parts[0];
+  const sourceName = parts[3]?.replace(/"/g, '');
+  const spellId = parseInt(parts[9], 10);
+
+  // Si el evento registra daño o buff de un abalorio conocido:
+  if ((eventType.includes('SPELL_AURA') || eventType.includes('SPELL_DAMAGE')) && TRINKET_SPELL_MAPPING[spellId]) {
+    if (playersData[sourceName]) {
+      if (!playersData[sourceName].trinketIDs) {
+        playersData[sourceName].trinketIDs = [];
+      }
+      const trinketData = TRINKET_SPELL_MAPPING[spellId];
+      // Guardamos el itemID único si no lo tiene registrado ya
+      if (!playersData[sourceName].trinketIDs.includes(trinketData.itemID)) {
+        playersData[sourceName].trinketIDs.push(trinketData.itemID);
+      }
+    }
+  }
+}
 
 // ENDPOINT DE SUBIDA Y PROCESAMIENTO DE LOGS
 app.post('/upload-log', upload.single('combatlog'), async (req, res) => {
@@ -1114,7 +1220,16 @@ app.post('/upload-log', upload.single('combatlog'), async (req, res) => {
       }
     }
 
-    const ranking = Object.values(playersData).sort((a, b) => b.totalDaño - a.totalDaño);
+    const ranking = Object.values(playersData).map(p => ({
+      nombre: p.nombre,
+      clase: p.clase || 'Guerrero',
+      rama: p.rama || 'Furia',
+      totalDaño: p.totalDaño,
+      dps: ((p.totalDaño || 0) / 60).toLocaleString('en-US', { maximumFractionDigits: 0 }),
+      boss: p.bossDetected || "Morchok",
+      dificultad: p.diffDetected || "10H",
+      trinketIDs: p.trinketIDs || []
+    })).sort((a, b) => b.totalDaño - a.totalDaño);
 
     fs.unlinkSync(filePath);
     res.json({ success: true, ranking: ranking });
