@@ -1,0 +1,90 @@
+:root {
+  --bg-dark: #12141d;
+  --panel-bg: #1a1d29;
+  --accent-gold: #f5ab00;
+  --text-main: #ffffff;
+  --text-muted: #9d9d9d;
+  --border-color: #2e3346;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Barra de arriba tipo Raider.IO */
+.navbar {
+  background-color: #0f1118;
+  border-bottom: 2px solid var(--accent-gold);
+  display: flex;
+  align-items: center;
+  padding: 15px 30px;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.brand span {
+  color: var(--accent-gold);
+}
+
+/* Panel central */
+.main-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+.raider-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-top: 4px solid var(--accent-gold);
+  border-radius: 8px;
+  padding: 35px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.raider-card h1 {
+  font-size: 1.8rem;
+  margin-top: 0;
+  color: var(--accent-gold);
+}
+
+.raider-card p {
+  color: var(--text-muted);
+  margin-bottom: 25px;
+}
+
+/* Botón dorado estilo WoW */
+.btn-gold {
+  background: linear-gradient(180deg, #f5ab00 0%, #c48200 100%);
+  color: #111;
+  font-weight: bold;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px rgba(245, 171, 0, 0.3);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(180deg, #ffbe2e 0%, #d89000 100%);
+}
+
+.file-zone {
+  background: #12141d;
+  border: 2px dashed var(--border-color);
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
